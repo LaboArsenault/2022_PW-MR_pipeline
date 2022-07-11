@@ -11,7 +11,7 @@ Contact : jerome.bourgault@criucpq.ulaval.ca <br>
 - Rscript PWAS.R [options]
 
 ## Prerequisites
-### R packages :
+#### R packages :
     - data.table
     - TwoSampleMR
     - MRInstruments
@@ -26,7 +26,7 @@ Contact : jerome.bourgault@criucpq.ulaval.ca <br>
     - TissueEnrich
     - R2BGLiMS
     - ieugwasr
-### Software :
+#### Software :
     - gcta64 (in PATH)
 
 ## Important informations
