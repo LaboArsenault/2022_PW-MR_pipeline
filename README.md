@@ -12,7 +12,7 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
 
 ## Prerequisites
 - R packages :
-        - data.table
+- \t data.table
         - TwoSampleMR
         - MRInstruments
         - coloc
