@@ -1,0 +1,7 @@
+# Folders that should be in results :
+# - MRres
+# - MRdat
+# - coloc
+# - unprocessed
+# - sensitivity (if sensitivity analyses)
+

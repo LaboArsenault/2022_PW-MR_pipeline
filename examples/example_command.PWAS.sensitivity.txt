@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# ========================== BASIC INFORMATION ======== =============== #
+#                                                                       #
+# Most default arguments are supplied to make them visible, so that     #
+# subsequent analyses with other file types or studies should be easier #
+# to launch. The arguments should be the same for ARIC and deCODE,	#
+# except for 'mr_res', 'study' and 'dat_dir'.				#
+# But to insure proper functionning of the pipeline, make sure to read  #
+# the arguments description by calling :				#
+# - "Rscript ./PWAS.sensitivity.R --help"                               #
+#                                                                       #
+# BY DEFAULT, THE OUTPUT DIRECTORY AND NAMES WILL BE SET ACCORDING TO 	#
+# THIS FOLDER AND TO THE STUDY NAME ('study' argument) PROVIDED.	#
+#									#
+# ===================================================================== #
+
+## Example with ARIC
+# nohup ./PWAS_sensitivity.R --wd /mnt/sda/boujer01/Pancreatite/New_Analyses/ --mr_res /mnt/sda/boujer01/Pancreatite/New_Analyses/results/MRres/ARIC/MR_results_sensitivity_pval.5e-08_r2.0.1.txt --use_adjp TRUE --pval 0.05 --study ARIC --dat_dir /mnt/sda/boujer01/Pancreatite/New_Analyses/results/MRdat/ARIC --adjp_method fdr --pval_col pval --beta_col b --prot_col exposure --id_col exposure_exact --hyprcoloc TRUE --outcome_name Acute_Pancreatitis --volcano TRUE

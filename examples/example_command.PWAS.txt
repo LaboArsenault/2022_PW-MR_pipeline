@@ -1,0 +1,44 @@
+
+#########################################################################
+#									#
+# Whatever the dataset you use, do not specify 'NA' arguments, because  #
+# they might be considered as strings (char) and this might affect the  #
+# behavior of the script even though some control structures have been	#
+# added to try and avoid this.						#
+#									#
+######################################################################### 
+
+
+# ========================== BASIC INFORMATION ======== =============== #
+#									#
+# Most default arguments are supplied to make them visible, so that     #
+# subsequent analyses with other file types or studies should be easier #
+# to launch. Similarly, when lauching an analysis with deCODE '.txt.gz' #
+# files, the only things that should change are the the following :     #
+# - 'p_is_log'								#
+# - 'exp_is_vcf'							#
+# - 'exp_*_col_num'							#
+# But to insure proper functionning of the pipeline, make sure to read  #
+# the README file and the arguments description by calling :		#
+# - "Rscript ./PWAS.R --help"						#
+#									#
+# Since the deCODE analysis can take quite some time (~4-5 days), you	#
+# can use the 'decodetxt.loop.sh' bash script to split the analysis in	#
+# a specified number of batches.					#
+#                                                                       #
+# ===================================================================== #
+
+# =============== Example command with deCODE VCF files =============== #
+# Rscript ./PWAS.R --wd /mnt/sda/boujer01/Pancreatite/New_Analyses/ --window 1000000 --pval 5e-08 --r2 0.1 --study deCODE_vcf --study_dir /mnt/sda/gagelo01/Vcffile/Server_vcf/ --genes_ref_file ./data/GRCh38_chr_pos_genes.txt --snps_ref_file ./data/ukb_rsid_v3.txt --plink_binaries ./data/EUR_rs --exp_info_file ./data/decode_infos.txt --cojo_ldref ./data/EUR_rs --r2_corr 0.6 --cojo_ldref_rsids 1 --exp_beta_col Beta --exp_se_col SE --exp_pval_col Pval --exp_chr_col Chrom --exp_ea_col effectAllele --exp_oa_col otherAllele --exp_eaf_col ImpMAF --exp_snp_col ID --exp_pos_col Pos --exp_ss_total 35559 --exp_add_rsids FALSE --exp_p_is_log TRUE --exp_is_vcf TRUE --exp_vcf_skip 34 --exp_snp_col_num 3 --exp_chr_col_num 1 --exp_pos_col_num 2 --exp_a1_col_num 4 --exp_a2_col_num 5 --exp_maf_col_num 4 --exp_beta_col_num 5 --exp_se_col_num 6 --exp_p_col_num 7 --exp_n_col_num 8 --exp_form_col_num 12 --exp_cojo_snp_col ID --exp_cojo_snp_col_num 3 --out_gwas_file ./data/meta_clean_Acute_Pancreatitis_new_with_EB_old.txt.gz --out_pheno Acute_Pancreatitis --out_beta_col Effect --out_se_col StdErr --out_pos_col POS --out_chr_col CHR --out_snp_col MarkerName --out_ea_col Allele1 --out_oa_col Allele2 --out_pval_col Pvalue --out_eaf_col Freq1 --out_ss_total 881411 --out_add_rsids FALSE --out_p_is_log FALSE --out_ncase 10346 --save_every 1 --save_dat TRUE --nthreads 20 
+
+
+# =============== Example command with deCODE txt files =============== #
+# Rscript ./PWAS.R --wd /mnt/sda/boujer01/Pancreatite/New_Analyses/ --window 1000000 --pval 5e-08 --r2 0.1 --study deCODE --study_dir /home/couchr02/Mendel_Commun/dbs_Web/deCODE/ --genes_ref_file ./data/GRCh38_chr_pos_genes.txt --snps_ref_file ./data/ukb_rsid_v3.txt --plink_binaries ./data/EUR_rs --exp_info_file ./data/decodetxt_infos.txt --cojo_ldref ./data/EUR_rs --r2_corr 0.6 --cojo_ldref_rsids 1 --exp_beta_col Beta --exp_se_col SE --exp_pval_col Pval --exp_chr_col Chrom --exp_ea_col effectAllele --exp_oa_col otherAllele --exp_eaf_col ImpMAF --exp_ss_col N --exp_snp_col rsids --exp_pos_col Pos --exp_ss_total 35559 --exp_add_rsids FALSE --exp_p_is_log FALSE --exp_is_vcf FALSE --exp_snp_col_num 4 --exp_chr_col_num 1 --exp_pos_col_num 2 --exp_a1_col_num 5 --exp_a2_col_num 6 --exp_maf_col_num 12 --exp_beta_col_num 7 --exp_se_col_num 10 --exp_p_col_num 8 --exp_n_col_num 11 --out_gwas_file ./data/meta_clean_Acute_Pancreatitis_new_with_EB_old.txt.gz --out_pheno Acute_Pancreatitis --out_beta_col Effect --out_se_col StdErr --out_pos_col POS --out_chr_col CHR --out_snp_col MarkerName --out_ea_col Allele1 --out_oa_col Allele2 --out_pval_col Pvalue --out_eaf_col Freq1 --out_ss_total 881411 --out_add_rsids FALSE --out_p_is_log FALSE --out_ncase 10346 --save_every 1 --save_dat TRUE --nthreads 20
+
+
+# ================ Example command with ARIC txt files ================ #
+# Rscript ./PWAS.R --wd /mnt/sda/boujer01/Pancreatite/New_Analyses/ --window 1000000 --pval 5e-08 --r2 0.1 --study ARIC_reverse --study_dir /mnt/sda/boujer01/DATA/ARIC/EA_alleles_right/ --genes_ref_file ./data/GRCh38_chr_pos_genes.txt --snps_ref_file ./data/ukb_rsid_v3.txt --plink_binaries ./data/EUR_rs --cojo_ldref_rsids 0 --exp_beta_col BETA --exp_se_col SE --exp_pval_col P --exp_chr_col #CHROM --exp_eaf_col A1_FREQ --exp_ea_col ALT --exp_oa_col REF --exp_ss_col OBS_CT --exp_snp_col ID --exp_pos_col POS --exp_add_rsids FALSE --exp_p_is_log FALSE --exp_check_alleles FALSE --exp_is_vcf FALSE --exp_snp_col_num 3 --exp_chr_col_num 1 --exp_pos_col_num 2 --exp_a1_col_num 5 --exp_a2_col_num 4 --exp_maf_col_num 7 --exp_beta_col_num 10 --exp_se_col_num 11 --exp_p_col_num 13 --exp_n_col_num 9 --exp_ss_total 7213 --exp_info_file ./data/aric_infos.txt --out_gwas_file ./data/meta_clean_Acute_Pancreatitis_new_with_EB_old.txt.gz --out_pheno Acute_Pancreatitis --out_beta_col Effect --out_se_col StdErr --out_pos_col POS --out_chr_col CHR --out_snp_col MarkerName --out_ea_col Allele1 --out_oa_col Allele2 --out_pval_col Pvalue --out_eaf_col Freq1 --out_ss_total 881411 --out_add_rsids FALSE --out_p_is_log FALSE --out_ncase 10346 --save_every 1 --save_dat TRUE --nthreads 20
+
+
+# ========== REVERSE MR : Example command with ARIC txt files ========= #
+# Rscript ./PWAS.R --wd /mnt/sda/boujer01/Pancreatite/New_Analyses/ --window 1000000 --pval 5e-08 --r2 0.1 --study ARIC_reverse --study_dir /mnt/sda/boujer01/DATA/ARIC/EA_alleles_right/ --genes_ref_file ./data/GRCh38_chr_pos_genes.txt --snps_ref_file ./data/ukb_rsid_v3.txt --plink_binaries ./data/EUR_rs --reverse TRUE --cojo_ldref_rsids 0 --exp_beta_col BETA --exp_se_col SE --exp_pval_col P --exp_chr_col #CHROM --exp_eaf_col A1_FREQ --exp_ea_col ALT --exp_oa_col REF --exp_ss_col OBS_CT --exp_snp_col ID --exp_pos_col POS --exp_add_rsids FALSE --exp_p_is_log FALSE --exp_check_alleles FALSE --exp_is_vcf FALSE --exp_snp_col_num 3 --exp_chr_col_num 1 --exp_pos_col_num 2 --exp_a1_col_num 5 --exp_a2_col_num 4 --exp_maf_col_num 7 --exp_beta_col_num 10 --exp_se_col_num 11 --exp_p_col_num 13 --exp_n_col_num 9 --exp_ss_total 7213 --exp_info_file ./data/aric_infos.txt --out_gwas_file ./data/meta_clean_Acute_Pancreatitis_new_with_EB_old.txt.gz --out_pheno Acute_Pancreatitis --out_beta_col Effect --out_se_col StdErr --out_pos_col POS --out_chr_col CHR --out_snp_col MarkerName --out_ea_col Allele1 --out_oa_col Allele2 --out_pval_col Pvalue --out_eaf_col Freq1 --out_ss_total 881411 --out_add_rsids FALSE --out_p_is_log FALSE --out_ncase 10346 --save_every 1 --save_dat TRUE --nthreads 20
