@@ -12,20 +12,20 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
 
 ## Prerequisites
 - R packages :
-    - data.table
-        - TwoSampleMR
-        - MRInstruments
-        - coloc
-        - MRPRESSO
-        - MendelianRandomization
-        - hyprcoloc
-        - ggplot2
-        - ggrepel
-        - dplyr
-        - magrittr
-        - TissueEnrich
-        - R2BGLiMS
-        - ieugwasr
+-   - data.table
+    - TwoSampleMR
+    - MRInstruments
+    - coloc
+    - MRPRESSO
+    - MendelianRandomization
+    - hyprcoloc
+    - ggplot2
+    - ggrepel
+    - dplyr
+    - magrittr
+    - TissueEnrich
+    - R2BGLiMS
+    - ieugwasr
 - Software :
         - gcta64 (in PATH)
 
