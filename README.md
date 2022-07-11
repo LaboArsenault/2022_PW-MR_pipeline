@@ -30,9 +30,9 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
     - gcta64 (in PATH)
 
 ## Important informations
-- Make sure all included '.R' and '.sh' scripts are executable and all included folders are writable.
+### Make sure all included '.R' and '.sh' scripts are executable and all included folders are writable.
 
-To run this script properly (not mandatory, but easier to run with default options) :
+### To run this script properly (not mandatory, but easier to run with default options) :
 - data should include (in './data/') :
     - proteins information file (should contain at least the follow columns with identical names : id, trait, prot_name, file; All proteins included in the file will be used for the analysis.)
     - genes reference file (should contain the following columns in the same order (Chromosome/scaffold name must have the same name) : Gene stable ID version, Gene name, Chromosome/scaffold name, Gene start (bp), Gene end (bp), Gene stable ID)
