@@ -11,7 +11,7 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
 - Rscript PWAS.R [options]
 
 ## Prerequisites
-- R packages :
+- R packages : \n
         - data.table
         - TwoSampleMR
         - MRInstruments
