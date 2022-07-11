@@ -44,9 +44,9 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
            LD reference file in ./data/ can also be used for CoJo, if samplesize is sufficient.
 
 ## The sequence to run a full analysis goes like this :
-- 1.  PWAS.R
-- 2.  results_table.R (only works with results in MRres folder, not with sensitivity analyses results)
-- 3.  PWAS_sensitivity.R
+- 1.PWAS.R
+- 2.results_table.R (only works with results in MRres folder, not with sensitivity analyses results)
+- 3.PWAS_sensitivity.R
 
 ## References and methods used by this script
 - TwoSampleMR : Hemani et al., 2018 (doi: 10.7554/eLife.34408)
