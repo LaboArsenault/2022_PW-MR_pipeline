@@ -1,16 +1,16 @@
-## PW-MR pipeline for cis-MR analyses
+# PW-MR pipeline for cis-MR analyses
 
 PW-MR pipeline for cis-MR analyses
 Version : 1.0
 Created by : Jerome Bourgault
 Contact : jerome.bourgault@criucpq.ulaval.ca
 
-# Download
+## Download
 - cd your/folder/
 - git clone ...
 - Rscript PWAS.R [options]
 
-# Prerequisites
+## Prerequisites
 - R packages :
         - data.table
         - TwoSampleMR
@@ -29,7 +29,7 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
 - Software :
         - gcta64 (in PATH)
 
-# Important informations
+## Important informations
 - Make sure all included '.R' and '.sh' scripts are executable and all included folders are writable.
 
 To run this script properly (not mandatory, but easier to run with default options) :
@@ -44,12 +44,12 @@ To run this script properly (not mandatory, but easier to run with default optio
           (files by default were : './cojo/ldref/chr1_22/all_phase3').
           LD reference file in ./data/ can also be used for CoJo, if samplesize is sufficient.
 
-# The sequence to run a full analysis goes like this :
+## The sequence to run a full analysis goes like this :
 - 1. PWAS.R
 - 2. results_table.R (only works with results in MRres folder, not with sensitivity analyses results)
 - 3. PWAS_sensitivity.R
 
-# References and methods used by this script
+## References and methods used by this script
 - TwoSampleMR : Hemani et al., 2018 (doi: 10.7554/eLife.34408)
 - JAM : Newcombe et al., 2016 (doi: 10.1002/gepi.21953)
 - PCA for PW-MR : Burgess et al., 2017 (doi: 10.1002/gepi.22077)
