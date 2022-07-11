@@ -40,8 +40,7 @@ To run this script properly (not mandatory, but easier to run with default optio
     - LD reference file for MR clumping (PLINK format)
     - (optional) rsids reference file (should contain the following columns in the same order, NO HEADER : rsid, pos, chr)
 - cojo :
-    - Add you LD reference files in './cojo/ldref/' in PLINK format, splitted by chromosomes if possible (to reduce computing time)
-          (files by default were : './cojo/ldref/chr1_22/all_phase3').
+    - Add your LD reference files in './cojo/ldref/' in PLINK format, splitted by chromosomes if possible (to reduce computing time)
           LD reference file in ./data/ can also be used for CoJo, if samplesize is sufficient.
 
 ## The sequence to run a full analysis goes like this :
