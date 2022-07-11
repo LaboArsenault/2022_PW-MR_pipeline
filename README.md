@@ -39,8 +39,8 @@ Contact : jerome.bourgault@criucpq.ulaval.ca
     - chromosome lengths file (should contain at least the following columns in the same order with the same names : Chr, Total_length_db)
     - LD reference file for MR clumping (PLINK format)
     - (optional) rsids reference file (should contain the following columns in the same order, NO HEADER : rsid, pos, chr)
-#### cojo :
-    - Add your LD reference files in './cojo/ldref/' in PLINK format, splitted by chromosomes if possible (to reduce computing time)
+#### Cojo folder should include (in './cojo/ldref/') :
+    - Your LD reference files in PLINK format, splitted by chromosomes if possible (to reduce computing time)
           LD reference file in ./data/ can also be used for CoJo, if samplesize is sufficient.
 
 ## The sequence to run a full analysis goes like this :
