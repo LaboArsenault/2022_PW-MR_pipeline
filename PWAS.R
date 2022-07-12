@@ -10,7 +10,7 @@ library(optparse)
     make_option("--wd", action="store", default="./", type='character',
                 help=" working directory from which to access files"),
     make_option("--window", action="store", default=5e05, type='numeric',
-                help=" inclusion and clumping window (default 500 kb). Clumping will use (window/1000) as the SNPs inclusion distance on each side of the SNP."),
+                help=" inclusion and clumping window (default 500 kb)"),
     make_option("--pval", action="store", default=5e-08, type='numeric',
                 help=" pval threshold (default 5e-05)"),
     make_option("--r2", action="store", default=0.1, type='numeric',
@@ -455,7 +455,8 @@ save_res <- FALSE
                             yes = paste0("chr", prot_chr),
                             no = prot_chr)
     if(grepl(pattern = "deCODE", x = opt$study)){
-      if(!(prot_chr_bash %in% unique(outcome_format$chr.outcome))){
+      # if(!(prot_chr_bash %in% unique(outcome_format$chr.outcome))){
+      if(!(gsub(pattern = 'chr', replacement = '', x = prot_chr_bash) %in% unique(outcome_format$chr.outcome))){
         message(paste0("Protein located on chromosome ", prot_chr, ", which is absent from the outcome (exposure if reverse) GWAS. Skipping protein..."))
         next
       }
