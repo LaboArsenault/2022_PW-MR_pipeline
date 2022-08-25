@@ -1,6 +1,6 @@
 # PW-MR pipeline for cis-MR analyses
 
-Version : 1.1 <br>
+Version : 1.2 <br>
 Created by : Jerome Bourgault <br>
 Contact : jerome.bourgault@criucpq.ulaval.ca <br>
 
