@@ -1,6 +1,6 @@
 # PW-MR pipeline for cis-MR analyses
 
-Version : 1.0 <br>
+Version : 1.1 <br>
 Created by : Jerome Bourgault <br>
 Contact : jerome.bourgault@criucpq.ulaval.ca <br>
 
@@ -42,8 +42,8 @@ Contact : jerome.bourgault@criucpq.ulaval.ca <br>
 - Your LD reference files in PLINK format, splitted by chromosomes if possible (to reduce computing time). LD reference file in ./data/ can also be used for CoJo, if samplesize is sufficient.
 
 ## The sequence to run a full analysis goes like this :
-- 1.PWAS.R
-- 2.results_table.R (only works with results in MRres folder, not with sensitivity analyses results)
+- 1.PWAS.R or PWAS.proxies.R
+- 2.results_table.R (only works with results in MRres folder, not with sensitivity analyses results. If running 'loop' script, you should bind your MR results before calling results_table.R)
 - 3.PWAS_sensitivity.R
 
 ## References and methods used by this script

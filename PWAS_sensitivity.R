@@ -53,6 +53,8 @@ library(optparse)
                 help=" should you run HyPrColoc ? (default FALSE).
                 This only works if you supply a protein list to the 'proteins' option. 
                 If TRUE, see 'proteins' option requirements."),
+    make_option("--volcano_plot_adjp", action="store", default=FALSE, type='logical',
+                help=" Should the volcano plot y-axis correspond to adjusted p-values ? (default FALSE) "),
     
     make_option("--outcome_name", action="store", default="outcome", type='character',
                 help=" outcome name (Default 'outcome')"),
@@ -67,31 +69,12 @@ library(optparse)
 }
 setwd(opt$wd)
 
-# opt <- data.frame(wd = "/mnt/sda/boujer01/Pancreatite/New_Analyses/",
-#                   mr_res = "/mnt/sda/boujer01/Pancreatite/New_Analyses/results/MRres/ARIC/MR_results_sensitivity_pval.5e-08_r2.0.1.txt",
-#                   use_adjp = TRUE,
-#                   pval = 0.05,
-#                   study = "ARIC",
-#                   dat_dir = "/mnt/sda/boujer01/Pancreatite/New_Analyses/results/MRdat/ARIC",
-#                   adjp_method = 'fdr',
-#                   proteins  = NA,
-#                   pval_col = "pval",
-#                   beta_col = "b",
-#                   prot_col = "exposure",
-#                   id_col = "exposure_exact",
-#                   hyprcoloc = TRUE,
-#                   outcome_name = "Acute Pancreatitis",
-#                   volcano = TRUE,
-#                   tissue = TRUE,
-#                   out = NA
-# )
-
-
 ############################################################################### #
 #### 1. Parameters and selecting protein files ####
 {
   hypercoloc <- opt$hyprcoloc
   volcano <- opt$volcano
+  pval_col_noadj <- opt$pval_col
   if(is.na(opt$proteins)){
     # If proteins not provided, use MR results file and p-value threshold
     proteins <- as.data.frame(fread(file = opt$mr_res))
@@ -353,20 +336,27 @@ setwd(opt$wd)
     plot_pval_col <- ifelse(test = sum(grepl(pattern = "padj", x = colnames(proteins_all)) != 0),
                             yes = "padj",
                             no = "pval")
+    pval_col_volcano <- ifelse(test = opt$volcano_plot_adjp,
+                               yes = plot_pval_col,
+                               no = pval_col_noadj)
     proteins_all$col <- ifelse(test = eval(parse(text = paste0("proteins_all$", plot_pval_col))) < opt$pval,
                                yes = ifelse(test = proteins_all$beta < 0,
                                             yes = "green",
                                             no = "red"),
                                no = "black")
-    # proteins_all$label <- ifelse(test = eval(parse(text = paste0("proteins_all$", plot_pval_col))) < opt$pval,
-    #                            yes = proteins_all$name,
-    #                            no = "")
     lim <- ifelse(test = abs(min(proteins_all$beta)) > abs(max(proteins_all$beta)),
-                  yes = abs(min(proteins_all$beta))*1.5,
-                  no = abs(max(proteins_all$beta))*1.5)
-    # png(filename = outname_volcano_plot, width = 1000, height = 800, type = "cairo")
-    v_plot <- ggplot(data=proteins_all, aes(x=beta, y=-log10(eval(parse(text = plot_pval_col))), col=col)) +
-      geom_point() + 
+                  yes = abs(min(proteins_all$beta)),
+                  no = abs(max(proteins_all$beta)))
+    lim_y <- -log10(min(eval(parse(text = paste0("proteins_all$", pval_col_volcano)))))
+    breaks_x_to <- ifelse(test = (ceiling(lim/0.25)*0.25)%%0.25 == 0,
+                          yes = (ceiling(lim/0.25)*0.25)+0.25,
+                          no = (ceiling(lim/0.25)*0.25))
+    breaks_y_to <- ifelse(test = (ceiling(lim_y/2.5)*2.5)%%2.5 == 0,
+                          yes = (ceiling(lim_y/2.5)*2.5) + 2.5,
+                          no = (ceiling(lim_y/2.5)*2.5))
+    # Plotting the volcano plot
+    v_plot <- ggplot(data=proteins_all, aes(x=beta, y=-log10(eval(parse(text = pval_col_volcano))), col=col)) +
+      geom_point(size =1) + 
       theme_minimal() +
       theme(legend.position="none") +
       scale_color_manual(values=c("black", "green3", "red3")) +
@@ -379,20 +369,22 @@ setwd(opt$wd)
                       max.overlaps = 300,
                       size = 3.5,
                       segment.size = 0.5,
-                      segment.alpha = 0.5,
+                      segment.alpha = 0.3,
                       segment.linetype = "solid",
                       min.segment.length = 0,
                       force = 5,
                       force_pull = 1, 
-                      nudge_y = -log(eval(parse(text = paste0("proteins_all$", plot_pval_col))))/10, 
-                      nudge_x = -log2(abs(proteins_all$beta)) *proteins_all$beta
+                      nudge_y = -log(eval(parse(text = paste0("proteins_all$", pval_col_volcano))))/10, 
+                      nudge_x = -log2(abs(proteins_all$beta)) *proteins_all$beta/2
       ) +
       xlim(-lim, lim) +
       xlab("Effect (Beta)") +
       ylab("-log10(p)") +
-      ggtitle(label = paste0("PW-MR (", opt$study, ")"))
-    ggsave(filename = outname_volcano_plot, plot = v_plot, device = "png", bg = "white")
-    #dev.off()
+      ggtitle(label = paste0("PW-MR (", opt$study, ")")) +
+      scale_x_continuous(limits=c(-lim, lim), breaks = c(seq(from = -1, to = 1, by = 0.25))) +
+      scale_y_continuous(limits=c(0, lim_y),breaks = c(seq(from = 0, to = breaks_y_to, by = 2.5)))
+    v_plot
+    ggsave(filename = outname_volcano_plot, plot = v_plot, device = "png", bg = "white", width = 4000, height = 2400, units = 'px')
   }
 }
 ############################################################################### #

@@ -40,13 +40,13 @@ library(optparse)
     make_option("--cojo_ldref_rsids", action="store", default=1, type='numeric',
                 help=" (Optional) Does LD reference file for CoJo contains SNPs reference as rsids (1) instead of chr:pos:a1:a2 (0) ? (default 0) "),
     make_option("--reverse", action="store", default=FALSE, type='logical',
-                    help=" (Optional) Are you performing a reverse MR ? (default FALSE)
+                help=" (Optional) Are you performing a reverse MR ? (default FALSE)
                     In that case, keep the options as they are, exposure will automatically by reversed as outcome, and vice-versa.
-                    If performing MR reverse, only "),
+                    If performing MR reverse, to avoid reading whole GWAS file, reverse outcome (forward exposure) must contain RSIDs"),
     make_option("--proxies", action="store", default=TRUE, type='logical',
                 help=" (Optional) Should you use proxies ? (default TRUE)"),
-
-
+    
+    
     ## EXPOSURE OPTIONS
     make_option("--exp_beta_col", action="store", default="Beta", type='character',
                 help=" beta col"),
@@ -110,9 +110,9 @@ library(optparse)
                 help=" exposure SNP column for CoJo (SNPs in format chr:pos:a1:a2 ) "),
     make_option("--exp_cojo_snp_col_num", action="store", default=3, type='numeric',
                 help=" exposure SNP column number for CoJo (SNPs in format chr:pos:a1:a2 ) "),
-
-
-
+    
+    
+    
     ## OUTCOME OPTIONS
     make_option("--out_gwas_file", action="store", default="./data/meta_clean_Acute_Pancreatitis.txt.gz", type='character',
                 help=" GWAS file for outcome. MUST NOT CONTAIN ANY OTHER HEADER THAN COLUMN NAMES (if vcf, for example). Other methods to read outcome GWAS are not implemented yet."),
@@ -146,9 +146,9 @@ library(optparse)
                 help=" (Optional) Is outcome pvalue in log10 ? "),
     make_option("--out_ncase", action="store", default=NA, type='numeric',
                 help=" outcome ncases for coloc only (if NA, coloc will use 'type = quant' instead of 'type = cc'). Note that 'out_ss_total' is mandatory if this argument is specified. "),
-
-
-
+    
+    
+    
     ## OUTPUT OPTIONS
     make_option("--save_every", action="store", default=1, type='numeric',
                 help=" save results every X analysis (default 1)"),
@@ -160,6 +160,10 @@ library(optparse)
                 help=" output name of coloc results"),
     make_option("--save_dat", action="store", default=TRUE, type='logical',
                 help=" should you save MR data for each protein? (default TRUE) "),
+    make_option("--check_memory", action="store", default=TRUE, type='logical',
+                help=" (Optional) Should you check for memory usage and kill the task if it exceeds a certain amount of memory ? (default TRUE)"),
+    make_option("--check_memory_lim", action="store", default=0.9, type='numeric',
+                help=" (Optional)  If --check_memory, what is the ratio limit (current_mem_use/total_mem) before killing the task (Maximum is 0.95) ? (default 0.9)"),
     make_option("--nthreads", action="store", default=1, type='numeric',
                 help=" How many threads should you use to perform analyses ? (default 1) ")
   )
@@ -197,10 +201,10 @@ setDTthreads(threads = opt$nthreads, throttle = 1024*opt$nthreads)
                         yes = TRUE,
                         no = FALSE)
   if(!use_from_to){
-    stop(" You specified only one of the 'from' and 'to' arguments. Specify either none or both of them. ")
+    stop(" You specified only one of the 'from' and 'to' arguments. Specify either none or both of them.")
   }
   # if(!(opt$study %in% c("INTERVAL", "deCODE", "ARIC"))){
-  if(!(grepl(pattern = "deCODE", x = opt$study) | !grepl(pattern = "ARIC", x = opt$study) | !grepl(pattern = "INTERVAL", x = opt$study))){
+  if(!(grepl(pattern = "deCODE", x = opt$study) | grepl(pattern = "Fenland", x = opt$study) | grepl(pattern = "ARIC", x = opt$study) | grepl(pattern = "INTERVAL", x = opt$study))){
     message(" Study name provided is not in INTERVAL, deCODE or ARIC. This script has not been tested yet on other studies and may be unstable for this analysis. ")
   }
   if(is.na(opt$exp_ss_total)){
@@ -309,18 +313,21 @@ setDTthreads(threads = opt$nthreads, throttle = 1024*opt$nthreads)
 ############################################################################### #
 #### 4. Genes reference files ####
 {
-  if(opt$study == "INTERVAL"){
-    # INTERVAL is b37 and requires a different reference file
-    genes <- as.data.frame(fread(file = opt$genes_ref_file, header = FALSE, stringsAsFactors = FALSE, nThread = opt$nthreads))
-    colnames(genes) <- c("CHR", "start", "end", "GeneName")
-  } else {
-    genes <- as.data.frame(fread(file = opt$genes_ref_file, header = TRUE, stringsAsFactors = FALSE, nThread = opt$nthreads))
-    genes <- subset(x = genes, subset = `Chromosome/scaffold name` %in% c(1:22), nThread = opt$nthreads)
-    genes$`Chromosome/scaffold name` <- as.numeric(genes$`Chromosome/scaffold name`)
-    genes <- genes[,c(2:5)]
-    colnames(genes) <- c("GeneName", "CHR", "start", "end")
-  }
-  genes <- subset(x = genes, subset = CHR <= 22)
+  # if(opt$study %in% c("INTERVAL", "deCODE_vcf", "Fenland_Pietzner")){
+  #   # INTERVAL is b37 and requires a different reference file
+  #   genes <- as.data.frame(fread(file = opt$genes_ref_file, header = FALSE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+  #   colnames(genes) <- c("CHR", "start", "end", "GeneName")
+  # } else {
+  #   genes <- as.data.frame(fread(file = opt$genes_ref_file, header = TRUE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+  #   genes <- subset(x = genes, subset = `Chromosome/scaffold name` %in% c(1:22), nThread = opt$nthreads)
+  #   genes$`Chromosome/scaffold name` <- as.numeric(genes$`Chromosome/scaffold name`)
+  #   genes <- genes[,c(2:5)]
+  #   colnames(genes) <- c("GeneName", "CHR", "start", "end")
+  # }
+  
+  genes <- as.data.frame(fread(file = opt$genes_ref_file, header = FALSE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+  colnames(genes) <- c("CHR", "start", "end", "GeneName")
+  genes <- subset(x = genes, subset = CHR %in% c(1:22))
   genes$CHR <- as.numeric(genes$CHR)
   genes$start <- as.numeric(genes$start)
   genes$end <- as.numeric(genes$end)
@@ -405,6 +412,9 @@ setDTthreads(threads = opt$nthreads, throttle = 1024*opt$nthreads)
   if(opt$reverse){
     outcome_all.clean <- outcome_format
     outcome_format.clean <- subset(x = outcome_format, subset = pval.outcome <= pval_threshold)
+    fwrite(x = as.list(outcome_format.clean$SNP),
+           file = paste0(outname, ".reverse.snps"),
+           sep = "\n", append = FALSE, col.names=FALSE, row.names=FALSE)
   }
 }
 ############################################################################### #
@@ -430,17 +440,16 @@ save_res <- FALSE
 
 ############################################################################### #
 #### 9. Begin loop on each protein ####
-signif.prots <- as.data.frame(data.table::fread(file = "./results/MRres/deCODE/no_proxies/signif.FDR.deCODE.pval.5e-08_r2.0.1.txt", header = FALSE, stringsAsFactors = FALSE))
-colnames(signif.prots) <- c("name")
-
-gene_prot_file <- subset(x= gene_prot_file, subset = prot_name %in% signif.prots$name)
-gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
-
 {
   start_all <- Sys.time()
-  loop_command <- ifelse(test = (use_from_to  & (from_na+to_na==2)),
-                         yes = paste0(opt$from, ":", opt$to),
-                         no = "1:nrow(gene_prot_file)")
+  if(use_from_to  & (from_na+to_na==2)){
+    loop_command <- paste0(opt$from, ":", opt$to)
+    if(opt$to >= nrow(gene_prot_file)){
+      opt$to <- nrow(gene_prot_file)
+    }
+  } else {
+    loop_command <- "1:nrow(gene_prot_file)"
+  }
   # for(i in 1:nrow(gene_prot_file)){
   for(i in eval(parse(text = loop_command))){
     message(paste0("\n\tProcessing protein ", gene_prot_file$prot_name[i], " (", gene_prot_file$file[i], ") (num :", i,") ...\n"))
@@ -450,12 +459,43 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
     }
     window <- as.numeric(opt$window)
     
+    if(opt$check_memory){
+      test <- as.data.frame(system2("free", " --mega", stdout = TRUE))
+      mem.col <- strsplit(test[1,], " +")[[1]]
+      mem.total <- as.numeric(strsplit(test[2,], " +")[[1]][which(mem.col=='total')])
+      mem.curr <- as.numeric(strsplit(test[2,], " +")[[1]][which(mem.col=='used')])
+      mem.used <- as.numeric(sapply(strsplit(as.character(pryr::mem_used()), ' '), `[[`, 1))/1e06
+      if(((mem.curr / mem.total) >= opt$check_memory_lim)){
+        message(paste0("Warning : memory usage above ", opt$check_memory_lim*100 ," % . This script represents ", (mem.used/mem.curr)*100, "% of current memory usage."))
+        if(((mem.curr / mem.total) >= 0.95) | ((mem.used/mem.curr) > opt$check_memory_lim)){
+          stop("Memory usage too high. Stopping analysis.")
+          gc()
+          quit(save = "no", status=1)
+        }
+      } else {
+        message(paste0("\n\t\t Script/Current memory usage : \t", (mem.used/mem.curr)*100, " %;\n\t\t Current/Total memory usage : \t", (mem.curr/mem.total)*100, " % "))
+      }
+    }
+    
     
     ############################################################## #
     #### __9.1. Reading and preparing exposure files ####
     if(opt$reverse){
       if(opt$exp_is_vcf){
-        gwas.vcf <- gwasvcf::query_gwas(vcf = paste0(gene_prot_file$path[i]))
+        
+        if((gene_prot_file$start[i]-window) <= 0){
+          window_start <- (gene_prot_file$start[i]) - 1
+        } else {
+          window_start <- window
+        }
+        if((gene_prot_file$end[i]+window) > chr_lengths[which(chr_lengths$Chr == prot_chr), "Total_length_db"]){
+          window_end <- (chr_lengths[which(chr_lengths$Chr == prot_chr), "Total_length_db"]) - (gene_prot_file$end[i])
+        } else {
+          window_end <- window
+        }
+        #gwas.vcf <- gwasvcf::query_gwas(vcf = paste0(gene_prot_file$path[i]))
+        gwas.vcf <- gwasvcf::query_gwas(vcf = paste0(gene_prot_file$path[i]), chrompos = paste0(prot_chr, ":", gene_prot_file$start[i]-window_start, "-", gene_prot_file$end[i]+window_end))
+        
         # eval(parse(text = paste0("pwas_file$", opt$exp_chr_col, " <- sapply(strsplit(x = pwas_file$", opt$exp_chr_col, ", split = 'chr'), `[[`, 2)")))
         pwas_gene <- try(gwasglue::gwasvcf_to_TwoSampleMR(vcf = gwas.vcf, type = "exposure"))
         if(inherits(pwas_gene, "try-error")){
@@ -474,9 +514,34 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
         exposure <- subset(x = pwas_gene, subset = !is.na(SNP))
         exposure <- subset(x = exposure, subset = !grepl(pattern = ",", x = SNP))
       } else {
-        pwas_gene <- as.data.frame(fread(file = paste0(gene_prot_file$path[i]), header = TRUE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+        # IF 
+        #   REVERSE-PWMR
+        # THEN
+        #   AWK by RSIDs in reverse outcome (forward exposure) to avoid reading whole GWAS file
+        word1 <- paste0("bash")
+        args1 <- paste0(" ./extract_reverse_snps.sh", 
+                        " -p ", gene_prot_file$prot_name[i], 
+                        " -f ", gene_prot_file$path[i], 
+                        " -s ", opt$study,
+                        " -r ", paste0(outname, ".reverse.snps"),
+                        " -t ", opt$exp_is_vcf,
+                        " -D ", opt$exp_vcf_skip)
+        system2(command = word1, args = args1)
+        
+        if(!file.exists(paste0("./temp_files/", opt$study, "/", gene_prot_file$prot_name[i], ".reverse.txt"))){
+          message("Reverse MR warning : rsIDs were not extracted properly from outcome file, which does not exist. Reading whole outcome GWAS.")
+          pwas_gene <- as.data.frame(fread(file = paste0(gene_prot_file$path[i]), header = TRUE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+        } else {
+          pwas_gene <- as.data.frame(fread(file = paste0("./temp_files/", opt$study, "/", gene_prot_file$prot_name[i], ".reverse.txt"), header = TRUE, stringsAsFactors = FALSE, nThread = opt$nthreads))
+          unlink(paste0("./temp_files/", opt$study, "/", gene_prot_file$prot_name[i], ".reverse.txt"))
+        }
         exposure <- subset(x = pwas_gene, subset = !is.na(eval(parse(text = opt$exp_snp_col))))
         exposure <- subset(x = exposure, subset = !grepl(pattern = ",", x = eval(parse(text = opt$exp_snp_col))))
+        eval(parse(text = paste0("exposure$", opt$exp_pval_col, "<- as.numeric(exposure$", opt$exp_pval_col, ")")))
+        eval(parse(text = paste0("exposure$", opt$exp_beta_col, "<- as.numeric(exposure$", opt$exp_beta_col, ")")))
+        eval(parse(text = paste0("exposure$", opt$exp_se_col, "<- as.numeric(exposure$", opt$exp_se_col, ")")))
+        eval(parse(text = paste0("exposure$", opt$exp_eaf_col, "<- as.numeric(exposure$", opt$exp_eaf_col, ")")))
+        eval(parse(text = paste0("exposure$", opt$exp_ss_col, "<- as.numeric(exposure$", opt$exp_ss_col, ")")))
         if(opt$exp_p_is_log){
           eval(parse(text = paste0("exposure$", opt$exp_pval_col, "<- 10**(exposure$", opt$exp_pval_col, ")")))
         }
@@ -650,7 +715,7 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
         }
       }
     }
-
+    
     if(nrow(exposure) == 0){
       message(paste0("\n No SNPs remaining after pval filtering for ", gene_prot_file$prot_name[i], ". Skipping protein...\n"))
       rm(list = c("pwas_file", "pwas_gene", "exposure"))
@@ -750,11 +815,6 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
       exposure_dat = exposure_format[which(exposure_format$SNP %in% out_clump$rsid),]
     }
     message("\n\tClumping done!\n")
-    
-    #### ____9.4.1. Saving MR dat (optional) ####
-    if(opt$save_dat){
-      fwrite(x = exposure_dat, file = paste0(outname_dat, gene_prot_file$prot_name[i], ".", gene_prot_file$id[i], "_SNPs_p.", pval_threshold, "_r2.", clump_r2,".txt"), sep = "\t")
-    }
     ############################################################## #
     
     
@@ -764,53 +824,78 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
     dat_all <- TwoSampleMR::harmonise_data(exposure_dat = exposure_dat,
                                            outcome_dat = outcome_format)
     
+    #### ____9.4.1. Saving MR dat (optional) ####
+    if(opt$save_dat){
+      fwrite(x = dat_all, file = paste0(outname_dat, gene_prot_file$prot_name[i], ".", gene_prot_file$id[i], "_SNPs_p.", pval_threshold, "_r2.", clump_r2,".txt"), sep = "\t")
+    }
+    
     if((nrow(exposure_dat) != nrow(dat_all)) & (opt$proxies)){
       message("Looking for proxies...")
       snps_exp_not_out <- subset(x = exposure_dat, subset = !(SNP %in% dat_all$SNP), select = "SNP")[[1]]
-      gwasvcf::set_plink()
+      success_proxies <- FALSE
+      ## If you want to use files from server (remote), set path = ""
+      gwasvcf::set_plink(path = "/usr/local/bin/plink")
       if(gwasvcf::check_plink()){
-        proxies <- gwasvcf::get_ld_proxies(rsid = snps_exp_not_out, bfile = opt$plink_binaries, tag_r2 = 0.8, threads = opt$nthreads, out = paste0("./temp_files/", opt$study, "/proxies.temp.txt"))
+        proxies <- try(gwasvcf::get_ld_proxies(rsid = snps_exp_not_out, bfile = opt$plink_binaries, tag_r2 = 0.8, threads = opt$nthreads, out = paste0("./temp_files/", opt$study, "/proxies.temp.", gene_prot_file$prot_name[i], "_", gene_prot_file$id[i],".txt")))
+        if(inherits(proxies, "try-error")){
+          message("No proxies left to be found in reference file (local). No proxies will be added.")
+          gwasvcf::set_plink(path = "")
+          if(gwasvcf::check_plink()){
+            proxies <- try(gwasvcf::get_ld_proxies(rsid = snps_exp_not_out, bfile = opt$plink_binaries, tag_r2 = 0.8, threads = opt$nthreads, out = paste0("./temp_files/", opt$study, "/proxies.temp.", gene_prot_file$prot_name[i], "_", gene_prot_file$id[i],".txt")))
+            if(inherits(proxies, "try-error")){
+              message("No proxies left to be found in reference file (remote). No proxies will be added.")
+            } else {
+              success_proxies <- TRUE
+            }
+          }
+        } else {
+          success_proxies <- TRUE
+        }
       } else {
         message("Finding proxies : gwasvcf::check_plink() is not true. Make sure you specify the plink software to use with gwasvcf::set_plink(). No proxies will be added.")
       }
-      proxies$R2 <- proxies$R**2
-      proxies <- proxies[with(proxies, order(R**2, decreasing = TRUE)),]
-      # Trying top proxies
-      proxies.top <- subset(x = proxies, subset = !duplicated(SNP_A))
-      proxies.top <- subset(x = proxies.top, subset = SNP_B %in% outcome_format$SNP)
-      if(nrow(proxies.top) == 0){
-        proxies.top <- subset(x = proxies, subset = SNP_B %in% outcome_format$SNP)
-        proxies.top <- proxies.top[with(proxies.top, order(R**2, decreasing = TRUE)),]
-        proxies.top <- subset(x = proxies.top, subset = !duplicated(SNP_A))
+      
+      if(success_proxies){
+        proxies$R2 <- proxies$R**2
+        proxies <- proxies[with(proxies, order(R**2, decreasing = TRUE)),]
+        # Trying top proxies
+        proxies.top <- subset(x = proxies, subset = !duplicated(SNP_A))
+        proxies.top <- subset(x = proxies.top, subset = SNP_B %in% outcome_format$SNP)
+        if(nrow(proxies.top) == 0){
+          proxies.top <- subset(x = proxies, subset = SNP_B %in% outcome_format$SNP)
+          proxies.top <- proxies.top[with(proxies.top, order(R**2, decreasing = TRUE)),]
+          proxies.top <- subset(x = proxies.top, subset = !duplicated(SNP_A))
+        }
+        for(j in nrow(proxies.top)){
+          exposure_dat[which(exposure_dat$SNP == proxies.top$SNP_A[j]), 
+                       c("SNP", 
+                         "effect_allele.exposure", 
+                         "other_allele.exposure", 
+                         "eaf.exposure", 
+                         "beta.exposure", 
+                         "pos.exposure")] <- c(
+                           proxies.top$SNP_B[j], 
+                           proxies.top$B1[j], 
+                           proxies.top$B2[j], 
+                           proxies.top$MAF_B[j], 
+                           ifelse(test = proxies.top$R[j] < 0, 
+                                  yes = -1*exposure_dat$beta.exposure, 
+                                  no = exposure_dat$beta.exposure), 
+                           proxies.top$BP_B[j])
+        }
+        dat_all <- TwoSampleMR::harmonise_data(exposure_dat = exposure_dat,
+                                               outcome_dat = outcome_format)
       }
-      for(j in nrow(proxies.top)){
-        exposure_dat[which(exposure_dat$SNP == proxies.top$SNP_A[j]), 
-                     c("SNP", 
-                       "effect_allele.exposure", 
-                       "other_allele.exposure", 
-                       "eaf.exposure", 
-                       "beta.exposure", 
-                       "pos.exposure")] <- c(
-                         proxies.top$SNP_B[j], 
-                         proxies.top$B1[j], 
-                         proxies.top$B2[j], 
-                         proxies.top$MAF_B[j], 
-                         ifelse(test = proxies.top$R[j] < 0, 
-                                yes = -1*exposure_dat$beta.exposure, 
-                                no = exposure_dat$beta.exposure), 
-                         proxies.top$BP_B[j])
-      }
-      dat_all <- TwoSampleMR::harmonise_data(exposure_dat = exposure_dat,
-                                             outcome_dat = outcome_format)
     }
-    
+    if(file.exists(paste0("./temp_files/", opt$study, "/proxies.temp.", gene_prot_file$prot_name[i], "_", gene_prot_file$id[i],".txt"))){
+      unlink(paste0("./temp_files/", opt$study, "/proxies.temp.", gene_prot_file$prot_name[i], "_", gene_prot_file$id[i],".txt"))
+    }
     if(!opt$reverse){
       dat_all$pos.outcome <- dat_all$pos.exposure
     }
     else {
       dat_all$pos.exposure <- dat_all$pos.outcome
     }
-    
     if(nrow(dat_all)==0) {
       message("\t\t *** WARNING : no SNPs in the european reference panel. \n\t\t NO HARMONIZATION WILL BE MADE ***")
       message("No SNP found in reference panel")
@@ -822,7 +907,6 @@ gene_prot_file <- gene_prot_file[51:nrow(gene_prot_file),]
       next
     }
     dat <- dat_all
-    
     ############################################################## #
     
     
